@@ -6,10 +6,35 @@
 
 **Entrega:** Enviar código fuente en un repositorio de GitHub (fork o nuevo repo) o zip adjunto al correo de respuesta.
 
-**IA y Live Coding:** Si utilizas herramientas de IA (ChatGPT, Copilot, etc.) incluye en la entrega:
-- Los prompts utilizados
-- Metodología de trabajo asistido empleada
-- Documentación de decisiones técnicas tomadas
+**IA y Live Coding:** Valoramos altamente el uso eficiente de herramientas de IA en el desarrollo. Si utilizas herramientas de IA (ChatGPT, Claude, GitHub Copilot, etc.), **incluye obligatoriamente en la entrega:**
+
+### 📋 Reporte de Uso de IA
+- **Ventana de contexto utilizada:** Cantidad de tokens/caracteres enviados por prompt
+- **Consumo de tokens:** Estimación del total de tokens utilizados durante el desarrollo
+- **Herramientas específicas:** Modelo y versión (ej: GPT-4, Claude 3.5, Copilot)
+- **Distribución del código:**
+  - % de código generado por IA vs. código humano
+  - Justificación de por qué se distribuyó de esa manera
+  - Qué partes se delegaron a la IA y cuáles se codificaron manualmente
+- **Metodología de trabajo asistido:**
+  - Estrategia de prompting utilizada
+  - Cómo se estructuraron las conversaciones con la IA
+  - Técnicas de refinamiento y iteración empleadas
+- **Prompts clave utilizados:** Ejemplos de los prompts más efectivos
+- **Decisiones técnicas:** Documentación de elecciones arquitectónicas influenciadas por la IA
+
+### 🎯 Lo que buscamos evaluar:
+- **Optimización del uso de IA:** Capacidad para obtener resultados de alta calidad minimizando iteraciones
+- **Conocimiento de limitaciones:** Identificación de cuándo la IA es útil vs. cuándo es mejor el enfoque manual
+- **Integración inteligente:** Cómo combinas efectivamente el código generado por IA con tu experiencia técnica
+- **Productividad:** Capacidad para acelerar el desarrollo manteniendo la calidad del código
+- **Criterio técnico:** Habilidad para revisar, validar y mejorar el código generado por IA
+
+### ⚡ Bonus por uso avanzado:
+- Uso de técnicas avanzadas de prompting (chain-of-thought, few-shot learning, etc.)
+- Automatización de tareas repetitivas usando IA
+- Generación eficiente de tests y documentación
+- Optimización de queries SQL asistida por IA con validación manual
 
 ## 🚀 Configuración del Proyecto
 
