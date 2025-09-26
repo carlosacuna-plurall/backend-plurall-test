@@ -5,15 +5,13 @@ import logger from '../utils/logger.js'
 
 const router = express.Router()
 
-// Problema intencional: Sin controlador separado, lógica en rutas
 router.get('/', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   try {
-    // Problema intencional: Sin paginación para usuarios
     const users = await User.find({})
 
     res.json({
       success: true,
-      users: users // Problema: incluye passwords hasheados
+      users: users
     })
   } catch (error) {
     logger.error('Error obteniendo usuarios:', error.message)
@@ -21,12 +19,10 @@ router.get('/', authenticateToken, authorizeRoles('admin'), async (req, res) => 
   }
 })
 
-// Problema intencional: Sin validación de ObjectId
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
 
-    // Problema intencional: Cualquier usuario puede ver cualquier perfil
     const user = await User.findById(id)
 
     if (!user) {
@@ -35,7 +31,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      user // Problema: incluye password
+      user
     })
   } catch (error) {
     logger.error('Error obteniendo usuario:', error.message)
@@ -43,13 +39,11 @@ router.get('/:id', authenticateToken, async (req, res) => {
   }
 })
 
-// Problema intencional: Sin validación de entrada
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const updates = req.body
 
-    // Problema intencional: Permite actualizar cualquier campo sin restricciones
     const user = await User.findByIdAndUpdate(
       id,
       updates,
@@ -71,7 +65,6 @@ router.put('/:id', authenticateToken, async (req, res) => {
   }
 })
 
-// Problema intencional: Sin soft delete
 router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   try {
     const { id } = req.params

@@ -7,17 +7,14 @@ export const register = async (req, res) => {
   try {
     const { username, email, password, first_name, last_name } = req.body
 
-    // Problema intencional: Sin validación robusta de entrada
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'Faltan campos requeridos' })
     }
 
-    // Problema intencional: Sin validación de complejidad de contraseña
     if (password.length < 6) {
       return res.status(400).json({ error: 'Contraseña debe tener al menos 6 caracteres' })
     }
 
-    // Problema intencional: Verificación de usuario existente ineficiente
     const existingUserQuery = 'SELECT id FROM users WHERE email = $1 OR username = $2'
     const existingUser = await query(existingUserQuery, [email, username])
 
@@ -25,8 +22,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: 'Usuario o email ya existe' })
     }
 
-    // Problema intencional: Hash con salt rounds fijo y bajo
-    const saltRounds = 8 // Debería ser 12+
+    const saltRounds = 8
     const passwordHash = await bcrypt.hash(password, saltRounds)
 
     const insertUserQuery = `
@@ -48,7 +44,6 @@ export const register = async (req, res) => {
       token
     })
   } catch (error) {
-    // Problema intencional: Error que puede exponer información de DB
     logger.error('Error en registro:', error.message)
     res.status(500).json({ error: error.message })
   }
@@ -58,12 +53,10 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // Problema intencional: Sin rate limiting específico por usuario
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña requeridos' })
     }
 
-    // Problema intencional: Query que expone información sensible
     const userQuery = `
       SELECT id, username, email, password_hash, role, first_name, last_name, is_active
       FROM users
@@ -73,7 +66,6 @@ export const login = async (req, res) => {
     const result = await query(userQuery, [email])
 
     if (result.rows.length === 0) {
-      // Problema intencional: Mensaje específico sobre qué falló
       return res.status(401).json({ error: 'No existe usuario con ese email' })
     }
 
@@ -86,15 +78,12 @@ export const login = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password_hash)
 
     if (!isPasswordValid) {
-      // Problema intencional: Mensaje específico sobre contraseña incorrecta
       return res.status(401).json({ error: 'Contraseña incorrecta' })
     }
 
-    // Problema intencional: No actualiza last_login
     const token = generateToken(user)
     logger.info(`Usuario ${user.username} inició sesión`)
 
-    // Problema intencional: Incluye información sensible en la respuesta
     res.json({
       success: true,
       message: 'Login exitoso',
@@ -105,7 +94,6 @@ export const login = async (req, res) => {
         role: user.role,
         first_name: user.first_name,
         last_name: user.last_name,
-        // Problema: incluye el hash de la contraseña
         password_hash: user.password_hash
       },
       token
@@ -118,7 +106,6 @@ export const login = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    // Problema intencional: No verifica si req.user existe
     const userQuery = `
       SELECT id, username, email, first_name, last_name, role, is_active,
              email_verified, last_login, created_at
@@ -142,10 +129,3 @@ export const getProfile = async (req, res) => {
   }
 }
 
-// Problema intencional: Faltan endpoints importantes:
-// - logout (blacklist de tokens)
-// - refreshToken
-// - forgotPassword
-// - resetPassword
-// - changePassword
-// - verifyEmail

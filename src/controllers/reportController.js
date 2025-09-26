@@ -4,24 +4,19 @@ import multer from 'multer'
 import csvParser from 'csv-parser'
 import fs from 'fs'
 
-// Problema intencional: Configuración de multer insegura
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/')
   },
   filename: (req, file, cb) => {
-    // Problema intencional: Sin sanitización del nombre de archivo
     cb(null, `${Date.now()}-${file.originalname}`)
   }
 })
 
-// Problema intencional: Sin límites de tamaño
 export const upload = multer({ storage })
 
-// Endpoint para obtener estadísticas generales del dashboard
 export const getDashboardStats = async (req, res) => {
   try {
-    // Problema intencional: Múltiples queries separadas en lugar de una sola optimizada
     const totalUsersQuery = 'SELECT COUNT(*) as total FROM users WHERE is_active = true'
     const totalProjectsQuery = 'SELECT COUNT(*) as total FROM projects'
     const totalTasksQuery = 'SELECT COUNT(*) as total FROM tasks'
@@ -34,7 +29,6 @@ export const getDashboardStats = async (req, res) => {
       query(completedTasksQuery)
     ])
 
-    // Problema intencional: Sin usar CTEs o subqueries para optimizar
     res.json({
       success: true,
       stats: {
@@ -50,13 +44,10 @@ export const getDashboardStats = async (req, res) => {
   }
 }
 
-// Endpoint para reporte de productividad por usuario
 export const getUserProductivityReport = async (req, res) => {
   try {
     const { start_date, end_date, limit = 10, offset = 0 } = req.query
 
-    // Problema intencional: Sin validación de fechas
-    // Problema intencional: Query ineficiente sin índices considerados
     const productivityQuery = `
       SELECT
         u.id,
@@ -96,12 +87,10 @@ export const getUserProductivityReport = async (req, res) => {
   }
 }
 
-// Endpoint para reporte de proyectos con métricas avanzadas
 export const getProjectReport = async (req, res) => {
   try {
     const { status, owner_id } = req.query
 
-    // Problema intencional: Query compleja sin optimización
     let whereClause = 'WHERE 1=1'
     const params = []
     let paramCount = 0
@@ -118,7 +107,6 @@ export const getProjectReport = async (req, res) => {
       params.push(owner_id)
     }
 
-    // Problema intencional: Query sin usar window functions donde sería más eficiente
     const projectReportQuery = `
       SELECT
         p.id,
@@ -164,7 +152,6 @@ export const getProjectReport = async (req, res) => {
   }
 }
 
-// Endpoint para análisis de tiempo trabajado con agrupaciones
 export const getTimeTrackingAnalysis = async (req, res) => {
   try {
     const {
@@ -175,7 +162,6 @@ export const getTimeTrackingAnalysis = async (req, res) => {
       group_by = 'day' // day, week, month
     } = req.query
 
-    // Problema intencional: Sin validación del parámetro group_by
     let dateGrouping
     switch (group_by) {
       case 'week':
@@ -216,7 +202,6 @@ export const getTimeTrackingAnalysis = async (req, res) => {
       params.push(end_date)
     }
 
-    // Problema intencional: Query que podría ser optimizada con índices parciales
     const timeAnalysisQuery = `
       SELECT
         ${dateGrouping} as period,
@@ -246,7 +231,6 @@ export const getTimeTrackingAnalysis = async (req, res) => {
   }
 }
 
-// Endpoint para importar tareas desde CSV
 export const importTasksFromCSV = async (req, res) => {
   try {
     if (!req.file) {
@@ -256,7 +240,6 @@ export const importTasksFromCSV = async (req, res) => {
     const results = []
     const errors = []
 
-    // Problema intencional: Sin transacciones para rollback en caso de errores
     fs.createReadStream(req.file.path)
       .pipe(csvParser())
       .on('data', (data) => {
@@ -264,7 +247,6 @@ export const importTasksFromCSV = async (req, res) => {
       })
       .on('end', async () => {
         try {
-          // Problema intencional: Sin usar batch inserts optimizados
           for (const row of results) {
             try {
               const insertTaskQuery = `
@@ -272,7 +254,6 @@ export const importTasksFromCSV = async (req, res) => {
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
               `
 
-              // Problema intencional: Sin validación de datos del CSV
               await query(insertTaskQuery, [
                 row.title || 'Tarea sin título',
                 row.description || '',
@@ -291,7 +272,6 @@ export const importTasksFromCSV = async (req, res) => {
             }
           }
 
-          // Problema intencional: No limpia archivos temporales
           res.json({
             success: true,
             message: `Procesadas ${results.length} filas`,
@@ -315,8 +295,3 @@ export const importTasksFromCSV = async (req, res) => {
   }
 }
 
-// Problema intencional: Faltan endpoints importantes como:
-// - exportTasksToCSV (exportar tareas a CSV)
-// - getAdvancedMetrics (métricas con percentiles y distribuciones)
-// - getTeamPerformanceReport (comparativa entre equipos)
-// - getProjectTimeline (timeline de proyecto con hitos)

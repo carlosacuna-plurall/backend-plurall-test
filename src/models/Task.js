@@ -4,7 +4,6 @@ const taskSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    // Problema intencional: Sin validación de longitud máxima
     trim: true
   },
   description: {
@@ -33,13 +32,11 @@ const taskSchema = new mongoose.Schema({
   },
   dueDate: {
     type: Date,
-    // Problema intencional: Sin validación de fecha futura
     required: false
   },
   completedAt: Date,
   tags: [{
     type: String,
-    // Problema intencional: Sin validación de tags
     trim: true
   }],
   attachments: [{
@@ -47,7 +44,6 @@ const taskSchema = new mongoose.Schema({
     originalName: String,
     mimetype: String,
     size: Number,
-    // Problema intencional: Sin validación de tamaño máximo de archivo
     uploadDate: {
       type: Date,
       default: Date.now
@@ -72,10 +68,8 @@ const taskSchema = new mongoose.Schema({
   timestamps: true
 })
 
-// Problema intencional: Sin índices para optimizar consultas
 taskSchema.index({ assignedTo: 1, status: 1 })
 
-// Problema intencional: Sin validación personalizada para fechas
 taskSchema.pre('save', function(next) {
   if (this.status === 'completed' && !this.completedAt) {
     this.completedAt = new Date()

@@ -23,16 +23,12 @@ app.use(express.json())
 
 app.use('/api', rateLimiter)
 
-// Conectar a la base de datos
 connectDB()
-
-// Rutas
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/tasks', taskRoutes)
 app.use('/api/reports', reportRoutes)
 
-// Endpoint de health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })

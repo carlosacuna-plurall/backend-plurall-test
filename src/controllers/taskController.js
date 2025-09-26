@@ -6,12 +6,10 @@ export const createTask = async (req, res) => {
     const { title, description, project_id, assigned_to, priority, due_date, estimated_hours } = req.body
     const created_by = req.user.userId
 
-    // Problema intencional: Sin validación robusta de entrada
     if (!title) {
       return res.status(400).json({ error: 'Título es requerido' })
     }
 
-    // Problema intencional: Query vulnerable a SQL injection si no se usan parámetros
     const insertQuery = `
       INSERT INTO tasks (title, description, project_id, assigned_to, created_by, priority, due_date, estimated_hours)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -56,10 +54,8 @@ export const getTasks = async (req, res) => {
       order = 'DESC'
     } = req.query
 
-    // Problema intencional: Sin validación de parámetros de entrada
     const offset = (page - 1) * limit
 
-    // Problema intencional: Query sin optimización, sin índices considerados
     let whereClause = 'WHERE 1=1'
     const queryParams = []
     let paramCount = 0
@@ -88,7 +84,6 @@ export const getTasks = async (req, res) => {
       queryParams.push(project_id)
     }
 
-    // Problema intencional: Query ineficiente, N+1 problem potencial
     const tasksQuery = `
       SELECT
         t.*,
@@ -110,14 +105,13 @@ export const getTasks = async (req, res) => {
 
     const result = await query(tasksQuery, queryParams)
 
-    // Problema intencional: No cuenta el total para paginación correcta
     res.json({
       success: true,
       tasks: result.rows,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: undefined // Problema: no se calcula el total
+        total: undefined
       }
     })
   } catch (error) {
@@ -130,7 +124,6 @@ export const getTaskById = async (req, res) => {
   try {
     const { id } = req.params
 
-    // Problema intencional: Sin validación de UUID válido
     const taskQuery = `
       SELECT
         t.*,
@@ -156,7 +149,6 @@ export const getTaskById = async (req, res) => {
 
     const task = result.rows[0]
 
-    // Problema intencional: Query separada para comentarios (N+1 problem)
     const commentsQuery = `
       SELECT
         tc.*,
@@ -172,7 +164,6 @@ export const getTaskById = async (req, res) => {
     const commentsResult = await query(commentsQuery, [id])
     task.comments = commentsResult.rows
 
-    // Problema intencional: Sin verificación de permisos de acceso
     res.json({
       success: true,
       task
@@ -188,8 +179,6 @@ export const updateTask = async (req, res) => {
     const { id } = req.params
     const { title, description, status, priority, assigned_to, due_date, estimated_hours, actual_hours } = req.body
 
-    // Problema intencional: Sin verificación de permisos para actualizar
-    // Problema intencional: Update sin SET dinámico, todos los campos siempre
     const updateQuery = `
       UPDATE tasks
       SET
@@ -232,7 +221,6 @@ export const deleteTask = async (req, res) => {
   try {
     const { id } = req.params
 
-    // Problema intencional: Hard delete sin verificación de permisos
     const deleteQuery = 'DELETE FROM tasks WHERE id = $1 RETURNING *'
     const result = await query(deleteQuery, [id])
 
@@ -258,7 +246,6 @@ export const addComment = async (req, res) => {
     const { content } = req.body
     const user_id = req.user.userId
 
-    // Problema intencional: Sin validación de longitud del comentario
     if (!content) {
       return res.status(400).json({ error: 'Contenido del comentario requerido' })
     }
@@ -271,7 +258,6 @@ export const addComment = async (req, res) => {
 
     const result = await query(insertCommentQuery, [id, user_id, content])
 
-    // Problema intencional: No retorna información del usuario que comentó
     res.json({
       success: true,
       message: 'Comentario agregado exitosamente',
@@ -283,8 +269,3 @@ export const addComment = async (req, res) => {
   }
 }
 
-// Problema intencional: Faltan endpoints importantes como:
-// - getTasksByUser (tareas asignadas al usuario actual)
-// - getTaskStats (estadísticas de tareas)
-// - bulkUpdateTasks (actualización masiva)
-// - getTasksWithTimeTracking (tareas con horas registradas)
